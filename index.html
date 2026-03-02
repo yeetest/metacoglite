@@ -284,11 +284,12 @@
 <nav>
   <div class="nav-logo">MetaCogLite / 小元</div>
   <div class="nav-links">
-    <a href="#problem">Problem</a>
-    <a href="#framework">Framework</a>
-    <a href="#demo">Demo</a>
-    <a href="#research">Research</a>
-    <a href="#iteration">Iterations</a>
+    <a href="#problem" class="t" data-en="Problem" data-zh="问题定义">Problem</a>
+    <a href="#framework" class="t" data-en="Framework" data-zh="理论框架">Framework</a>
+    <a href="#demo" class="t" data-en="Demo" data-zh="产品演示">Demo</a>
+    <a href="#research" class="t" data-en="Research" data-zh="用户研究">Research</a>
+    <a href="#iteration" class="t" data-en="Iterations" data-zh="迭代历史">Iterations</a>
+    <button onclick="toggleLang()" id="lang-btn" style="font-family:var(--mono);font-size:12px;background:var(--red);color:white;border:none;padding:6px 14px;cursor:pointer;letter-spacing:0.05em;margin-left:8px;">中文</button>
   </div>
 </nav>
 
@@ -297,7 +298,7 @@
   <div class="hero-left">
     <div class="hero-tag">Peking University · EdTech · 2022–2024</div>
     <h1 class="hero-title"><em>MetaCog</em>Lite</h1>
-    <p class="hero-subtitle">TOEFL Reading AI Teaching Assistant</p>
+    <p class="hero-subtitle" id="tl-hero-sub">TOEFL Reading AI Teaching Assistant</p>
     <p class="hero-desc">
       An AI tutor that doesn't give answers — it builds thinkers. 
       Grounded in Reciprocal Teaching methodology, MetaCogLite scaffolds 
@@ -334,8 +335,8 @@
 
 <!-- PROBLEM -->
 <section id="problem">
-  <div class="section-tag">01 / Problem Statement</div>
-  <h2 class="section-title">The "Last Mile" gap in AI-assisted learning</h2>
+  <div class="section-tag" id="tl-prob-tag">01 / Problem Statement</div>
+  <h2 class="section-title" id="tl-prob-title">The "Last Mile" gap in AI-assisted learning</h2>
   <div class="problem-grid">
     <div class="problem-card fade-up" data-user="S">
       <div class="problem-user">STUDENT</div>
@@ -357,8 +358,8 @@
 
 <!-- FRAMEWORK -->
 <section id="framework">
-  <div class="section-tag">02 / Theoretical Framework</div>
-  <h2 class="section-title">Three pillars of effective AI-assisted learning</h2>
+  <div class="section-tag" id="tl-fw-tag">02 / Theoretical Framework</div>
+  <h2 class="section-title" id="tl-fw-title">Three pillars of effective AI-assisted learning</h2>
   <div class="pillars">
     <div class="pillar fade-up">
       <div class="pillar-num">01</div>
@@ -407,8 +408,8 @@
 
 <!-- DEMO -->
 <section id="demo" style="padding-top:100px;padding-bottom:0">
-  <div class="section-tag">03 / Product Demo</div>
-  <h2 class="section-title">Watch the scaffolding in action</h2>
+  <div class="section-tag" id="tl-demo-tag">03 / Product Demo</div>
+  <h2 class="section-title" id="tl-demo-title">Watch the scaffolding in action</h2>
 </section>
 <div style="padding: 0 80px 100px; background: var(--paper)">
   <div class="demo-container fade-up">
@@ -525,8 +526,8 @@
 
 <!-- RESEARCH -->
 <section id="research">
-  <div class="section-tag">04 / User Research</div>
-  <h2 class="section-title">Data-driven from day one</h2>
+  <div class="section-tag" id="tl-res-tag">04 / User Research</div>
+  <h2 class="section-title" id="tl-res-title">Data-driven from day one</h2>
   <div class="research-grid">
     <div class="research-block fade-up">
       <h3>76 In-service Teachers</h3>
@@ -553,8 +554,8 @@
 
 <!-- ITERATION -->
 <section id="iteration" style="background: var(--cream)">
-  <div class="section-tag">05 / Product Iteration</div>
-  <h2 class="section-title">Three data-driven iterations</h2>
+  <div class="section-tag" id="tl-iter-tag">05 / Product Iteration</div>
+  <h2 class="section-title" id="tl-iter-title">Three data-driven iterations</h2>
   <div class="iteration-timeline">
     <div class="iteration-item fade-up" data-v="V0">
       <div class="iter-version">VERSION 0</div>
@@ -586,7 +587,7 @@
     <div class="footer-name">Liu Yizheng 刘一峥</div>
     <div class="footer-title">AI Education Product Designer · PKU Educational Technology M.S. 2024</div>
     <div class="footer-contact">
-      kathy.yizheng.liu@gmail.com<br>
+      <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="610a001509184f18081b09040f064f0d081421060c00080d4f020e0c">[email&#160;protected]</a><br>
       18800011089<br>
       Hangzhou · Remote-friendly
     </div>
@@ -596,7 +597,7 @@
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // Tab switching
   function showTab(name) {
     document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
@@ -630,14 +631,52 @@
     });
   }, { threshold: 0.15 });
 
-  document.querySelectorAll('.fade-up, .stat-item, .problem-card, .pillar').forEach(el => {
-    observer.observe(el);
-  });
+  document.querySelectorAll('.fad
+<script>
+let lang = 'en';
+const T = {
+  en: {
+    'nav-problem':'Problem','nav-framework':'Framework','nav-demo':'Demo','nav-research':'Research','nav-iteration':'Iterations',
+    'hero-tag':'Peking University · EdTech · 2022–2024',
+    'hero-sub':'TOEFL Reading AI Teaching Assistant',
+    'hero-desc':"An AI tutor that doesn't give answers — it builds thinkers. Grounded in Reciprocal Teaching methodology, MetaCogLite scaffolds metacognitive strategies through structured AI-student dialogue.",
+    'prob-tag':'01 / Problem Statement',
+    'prob-title':'The "Last Mile" gap in AI-assisted learning',
+    'p0-user':'STUDENT','p0-title':'Copy-paste dependency','p0-desc':'Students use raw AI as a shortcut — pasting questions, copying answers — without building the metacognitive habits that drive real score improvement.',
+    'p1-user':'TEACHER','p1-title':'Repetitive low-value work','p1-desc':'80% of teacher prep time goes to explaining vocabulary, basic question types, and passage structure — tasks AI can handle — leaving no bandwidth for high-value coaching.',
+    'p2-user':'PARENT','p2-title':'Invisible progress','p2-desc':'Parents bear high tutoring costs with no visibility into how their child is learning — only test scores, not process.',
+    'fw-tag':'02 / Theoretical Framework','fw-title':'Three pillars of effective AI-assisted learning',
+    'demo-tag':'03 / Product Demo','demo-title':'Watch the scaffolding in action',
+    'res-tag':'04 / User Research','res-title':'Data-driven from day one',
+    'iter-tag':'05 / Product Iteration','iter-title':'Three data-driven iterations',
+  },
+  zh: {
+    'nav-problem':'问题定义','nav-framework':'理论框架','nav-demo':'产品演示','nav-research':'用户研究','nav-iteration':'迭代历史',
+    'hero-tag':'北京大学 · 教育技术学 · 2022–2024',
+    'hero-sub':'托福阅读 AI 智能助教',
+    'hero-desc':'不直接给答案的 AI 助教——它培养思考者。以互惠教学法为核心，通过结构化的人机对话引导学生发展元认知策略。',
+    'prob-tag':'01 / 问题定义',
+    'prob-title':'AI辅助学习的"最后一公里"断层',
+    'p0-user':'学生端','p0-title':'复制粘贴依赖','p0-desc':'学生将AI当作捷径，粘贴问题、复制答案，却没有养成真正驱动成绩提升的元认知习惯。',
+    'p1-user':'教师端','p1-title':'重复性低价值工作','p1-desc':'教师80%的备课时间用于解释词汇、题型和篇章结构——这些任务AI完全可以承担——没有余力做高价值的个性化辅导。',
+    'p2-user':'家长端','p2-title':'进度不可见','p2-desc':'家长承担高昂培训费用，却无法看到孩子的学习过程，只能看到考试分数。',
+    'fw-tag':'02 / 理论框架','fw-title':'有效AI辅助学习的三大支柱',
+    'demo-tag':'03 / 产品演示','demo-title':'观看脚手架式引导的实际效果',
+    'res-tag':'04 / 用户研究','res-title':'从第一天起就以数据为驱动',
+    'iter-tag':'05 / 产品迭代','iter-title':'三轮数据驱动迭代',
+  }
+};
 
-  // Init first chat
-  window.addEventListener('load', () => {
-    setTimeout(() => animateChat('predict'), 600);
+function toggleLang() {
+  lang = lang === 'en' ? 'zh' : 'en';
+  document.getElementById('lang-btn').textContent = lang === 'en' ? '中文' : 'EN';
+  Object.keys(T[lang]).forEach(id => {
+    const el = document.getElementById('tl-' + id);
+    if (el) el.textContent = T[lang][id];
   });
+  document.querySelectorAll('.t').forEach(el => {
+    const key = el.dataset.key;
+    if (key && T[lang][key]) el.textContent = T[lang][key];
+  });
+}
 </script>
-</body>
-</html>
