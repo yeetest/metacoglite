@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaCogLite — TOEFL Reading AI Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --cream: #ede7d9;
+    --red: #8b1a1a;
+    --red-light: #c5373733;
+    --gold: #b8860b;
+    --mono: 'DM Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 48px;
+    background: var(--paper);
+    border-bottom: 1px solid #d4c9b0;
+  }
+  .nav-logo { font-family: var(--mono); font-size: 13px; letter-spacing: 0.05em; color: var(--red); }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a { font-size: 13px; text-decoration: none; color: var(--ink); opacity: 0.6; transition: opacity 0.2s; }
+  .nav-links a:hover { opacity: 1; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 72px;
+  }
+  .hero-left {
+    padding: 80px 48px 80px 80px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid #d4c9b0;
+  }
+  .hero-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em;
+    color: var(--red); text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-tag::before { content: ''; width: 24px; height: 1px; background: var(--red); }
+  .hero-title {
+    font-family: var(--serif); font-size: clamp(48px, 5vw, 72px);
+    line-height: 1.05; margin-bottom: 8px;
+  }
+  .hero-title em { color: var(--red); font-style: italic; }
+  .hero-subtitle {
+    font-family: var(--serif); font-size: clamp(18px, 2vw, 24px);
+    color: #666; font-weight: 400; margin-bottom: 32px;
+    font-style: italic;
+  }
+  .hero-desc { font-size: 15px; color: #555; max-width: 440px; line-height: 1.75; margin-bottom: 40px; }
+  .hero-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .meta-chip {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--cream); border: 1px solid #d4c9b0;
+    padding: 6px 12px; letter-spacing: 0.05em;
+  }
+
+  .hero-right {
+    padding: 80px 80px 80px 48px;
+    display: flex; flex-direction: column; justify-content: center;
+    background: var(--cream);
+  }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #d4c9b0; border: 1px solid #d4c9b0; }
+  .stat-item {
+    background: var(--cream); padding: 32px 24px;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.5s ease;
+  }
+  .stat-item.visible { opacity: 1; transform: translateY(0); }
+  .stat-num {
+    font-family: var(--serif); font-size: 48px; color: var(--red);
+    line-height: 1; margin-bottom: 8px;
+  }
+  .stat-label { font-size: 12px; color: #666; line-height: 1.4; }
+
+  /* SECTION BASE */
+  section { padding: 100px 80px; }
+  section:nth-child(even) { background: var(--cream); }
+  .section-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em;
+    color: var(--red); text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--serif); font-size: clamp(32px, 3vw, 48px);
+    line-height: 1.1; margin-bottom: 48px; max-width: 600px;
+  }
+
+  /* PROBLEM */
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .problem-card {
+    border: 1px solid #d4c9b0; padding: 32px;
+    position: relative; overflow: hidden;
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.5s ease;
+  }
+  .problem-card.visible { opacity: 1; transform: translateY(0); }
+  .problem-card::before {
+    content: attr(data-user);
+    font-family: var(--serif); font-size: 72px; color: var(--red-light);
+    position: absolute; top: -10px; right: 16px;
+    line-height: 1; pointer-events: none;
+  }
+  .problem-user { font-family: var(--mono); font-size: 11px; color: var(--red); margin-bottom: 12px; letter-spacing: 0.1em; }
+  .problem-title { font-family: var(--serif); font-size: 22px; margin-bottom: 12px; }
+  .problem-desc { font-size: 14px; color: #555; line-height: 1.7; }
+
+  /* FRAMEWORK */
+  .pillars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border: 1px solid #d4c9b0; margin-bottom: 64px; }
+  .pillar {
+    padding: 40px 32px; border-right: 1px solid #d4c9b0;
+    opacity: 0; transition: all 0.5s ease;
+  }
+  .pillar:last-child { border-right: none; }
+  .pillar.visible { opacity: 1; }
+  .pillar-num { font-family: var(--mono); font-size: 48px; color: #d4c9b0; line-height: 1; margin-bottom: 16px; }
+  .pillar-title { font-family: var(--serif); font-size: 22px; margin-bottom: 8px; }
+  .pillar-sub { font-family: var(--mono); font-size: 11px; color: var(--red); margin-bottom: 12px; letter-spacing: 0.08em; }
+  .pillar-desc { font-size: 13px; color: #555; line-height: 1.7; }
+
+  /* ARCHITECTURE */
+  .arch-diagram {
+    border: 1px solid #d4c9b0; padding: 48px;
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    flex-wrap: wrap; background: var(--paper);
+    margin-bottom: 48px;
+  }
+  .arch-node {
+    background: var(--cream); border: 1px solid #d4c9b0;
+    padding: 20px 24px; text-align: center; min-width: 140px;
+  }
+  .arch-node.highlight { background: var(--red); color: white; border-color: var(--red); }
+  .arch-node-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+  .arch-node-title { font-family: var(--serif); font-size: 18px; }
+  .arch-arrow {
+    font-size: 24px; color: #d4c9b0; padding: 0 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .arch-arrow span { font-family: var(--mono); font-size: 10px; color: #999; white-space: nowrap; }
+
+  /* DEMO */
+  .demo-container {
+    border: 1px solid #d4c9b0; overflow: hidden;
+  }
+  .demo-tabs {
+    display: flex; border-bottom: 1px solid #d4c9b0;
+    background: var(--cream);
+  }
+  .demo-tab {
+    padding: 14px 24px; font-family: var(--mono); font-size: 12px;
+    cursor: pointer; border-right: 1px solid #d4c9b0;
+    letter-spacing: 0.05em; transition: all 0.2s;
+    background: transparent; border-top: none; border-left: none; color: #666;
+  }
+  .demo-tab.active { background: var(--paper); color: var(--red); border-bottom: 2px solid var(--red); margin-bottom: -1px; }
+  .demo-panel { display: none; padding: 0; }
+  .demo-panel.active { display: block; }
+
+  .chat-window { padding: 32px; max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+  .chat-msg { display: flex; gap: 16px; align-items: flex-start; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+  .chat-msg.ai { flex-direction: row; }
+  .chat-msg.user { flex-direction: row-reverse; }
+  .chat-msg.visible { opacity: 1; transform: translateX(0); }
+  .chat-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+  }
+  .chat-msg.ai .chat-avatar { background: var(--red); color: white; }
+  .chat-msg.user .chat-avatar { background: var(--ink); color: white; }
+  .chat-bubble {
+    max-width: 72%; padding: 14px 18px; font-size: 14px; line-height: 1.65;
+  }
+  .chat-msg.ai .chat-bubble { background: var(--cream); border: 1px solid #d4c9b0; }
+  .chat-msg.user .chat-bubble { background: var(--ink); color: white; }
+  .chat-bubble .strategy-tag {
+    display: inline-block; font-family: var(--mono); font-size: 10px;
+    background: var(--red-light); color: var(--red); padding: 2px 6px;
+    margin-bottom: 8px; letter-spacing: 0.08em;
+  }
+
+  .demo-replay {
+    border-top: 1px solid #d4c9b0; padding: 16px 32px;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--cream);
+  }
+  .replay-btn {
+    font-family: var(--mono); font-size: 12px; cursor: pointer;
+    background: var(--red); color: white; border: none;
+    padding: 8px 20px; letter-spacing: 0.05em; transition: opacity 0.2s;
+  }
+  .replay-btn:hover { opacity: 0.85; }
+  .replay-hint { font-size: 12px; color: #888; }
+
+  /* RESEARCH */
+  .research-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .research-block h3 { font-family: var(--serif); font-size: 26px; margin-bottom: 16px; }
+  .research-block p { font-size: 14px; color: #555; line-height: 1.75; margin-bottom: 16px; }
+  .finding-list { list-style: none; }
+  .finding-list li {
+    font-size: 14px; padding: 10px 0; border-bottom: 1px solid #e0d9cc;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .finding-list li::before { content: '→'; color: var(--red); flex-shrink: 0; font-family: var(--mono); }
+
+  /* ITERATION */
+  .iteration-timeline { position: relative; padding-left: 40px; }
+  .iteration-timeline::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 1px; background: #d4c9b0; }
+  .iteration-item { position: relative; margin-bottom: 48px; }
+  .iteration-item::before {
+    content: attr(data-v);
+    position: absolute; left: -40px; top: 0;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--red); color: white;
+    font-family: var(--mono); font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .iter-version { font-family: var(--mono); font-size: 11px; color: var(--red); margin-bottom: 6px; letter-spacing: 0.1em; }
+  .iter-trigger { font-size: 12px; color: #888; margin-bottom: 8px; font-style: italic; }
+  .iter-title { font-family: var(--serif); font-size: 22px; margin-bottom: 8px; }
+  .iter-desc { font-size: 14px; color: #555; line-height: 1.7; }
+  .iter-outcome {
+    margin-top: 12px; padding: 12px 16px;
+    background: var(--cream); border-left: 3px solid var(--red);
+    font-size: 13px; color: #444;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink); color: var(--paper);
+    padding: 60px 80px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .footer-name { font-family: var(--serif); font-size: 32px; margin-bottom: 8px; }
+  .footer-title { font-size: 14px; opacity: 0.6; margin-bottom: 24px; }
+  .footer-contact { font-family: var(--mono); font-size: 13px; opacity: 0.7; line-height: 2; }
+  .footer-right { display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; }
+  .footer-pku { font-family: var(--serif); font-size: 18px; opacity: 0.4; text-align: right; }
+
+  /* SCROLL ANIMATION */
+  .fade-up { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-left { padding: 60px 32px; border-right: none; }
+    .hero-right { padding: 40px 32px; }
+    section { padding: 60px 32px; }
+    .problem-grid, .pillars, .research-grid { grid-template-columns: 1fr; }
+    .pillar { border-right: none; border-bottom: 1px solid #d4c9b0; }
+    footer { grid-template-columns: 1fr; padding: 40px 32px; }
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">MetaCogLite / 小元</div>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#framework">Framework</a>
+    <a href="#demo">Demo</a>
+    <a href="#research">Research</a>
+    <a href="#iteration">Iterations</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding:0">
+  <div class="hero-left">
+    <div class="hero-tag">Peking University · EdTech · 2022–2024</div>
+    <h1 class="hero-title"><em>MetaCog</em>Lite</h1>
+    <p class="hero-subtitle">TOEFL Reading AI Teaching Assistant</p>
+    <p class="hero-desc">
+      An AI tutor that doesn't give answers — it builds thinkers. 
+      Grounded in Reciprocal Teaching methodology, MetaCogLite scaffolds 
+      metacognitive strategies through structured AI-student dialogue.
+    </p>
+    <div class="hero-meta">
+      <span class="meta-chip">GPT-4 + RAG</span>
+      <span class="meta-chip">Prompt Engineering</span>
+      <span class="meta-chip">Reciprocal Teaching</span>
+      <span class="meta-chip">Nudge Theory</span>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="stat-grid">
+      <div class="stat-item">
+        <div class="stat-num">71–93%</div>
+        <div class="stat-label">Accuracy on authentic TOEFL passages after prompt tuning</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">76</div>
+        <div class="stat-label">In-service teachers surveyed to inform V2 feature design</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0.994</div>
+        <div class="stat-label">Correlation: metacognitive strategy use → score improvement</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">56</div>
+        <div class="stat-label">Authentic TOEFL passages in RAG knowledge base</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-tag">01 / Problem Statement</div>
+  <h2 class="section-title">The "Last Mile" gap in AI-assisted learning</h2>
+  <div class="problem-grid">
+    <div class="problem-card fade-up" data-user="S">
+      <div class="problem-user">STUDENT</div>
+      <div class="problem-title">Copy-paste dependency</div>
+      <div class="problem-desc">Students use raw AI as a shortcut — pasting questions, copying answers — without building the metacognitive habits that drive real score improvement.</div>
+    </div>
+    <div class="problem-card fade-up" data-user="T">
+      <div class="problem-user">TEACHER</div>
+      <div class="problem-title">Repetitive low-value work</div>
+      <div class="problem-desc">80% of teacher prep time goes to explaining vocabulary, basic question types, and passage structure — tasks AI can handle — leaving no bandwidth for high-value coaching.</div>
+    </div>
+    <div class="problem-card fade-up" data-user="P">
+      <div class="problem-user">PARENT</div>
+      <div class="problem-title">Invisible progress</div>
+      <div class="problem-desc">Parents bear high tutoring costs with no visibility into how their child is learning — only test scores, not process. No way to assess if AI is helping or enabling avoidance.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FRAMEWORK -->
+<section id="framework">
+  <div class="section-tag">02 / Theoretical Framework</div>
+  <h2 class="section-title">Three pillars of effective AI-assisted learning</h2>
+  <div class="pillars">
+    <div class="pillar fade-up">
+      <div class="pillar-num">01</div>
+      <div class="pillar-title">Technical Affordance</div>
+      <div class="pillar-sub">RAG + Prompt Engineering</div>
+      <div class="pillar-desc">56 authentic TOEFL passages embedded in a RAG knowledge base. Chain-of-Thought, Few-Shot, and Step-by-Step prompting handle complex question types like Sentence Insertion and Inference.</div>
+    </div>
+    <div class="pillar fade-up" style="transition-delay:0.1s">
+      <div class="pillar-num">02</div>
+      <div class="pillar-title">Skilled Competence</div>
+      <div class="pillar-sub">Metacognitive Intervention</div>
+      <div class="pillar-desc">A 90-minute intervention course teaches students how to use the tool strategically. The AI shifts from answering to asking — initiating 30–70% of interactions using Reciprocal Teaching: Predict, Question, Clarify, Summarize.</div>
+    </div>
+    <div class="pillar fade-up" style="transition-delay:0.2s">
+      <div class="pillar-num">03</div>
+      <div class="pillar-title">Social Regulation</div>
+      <div class="pillar-sub">Nudge Theory + Default Design</div>
+      <div class="pillar-desc">Default options guide students toward deep processing. The AI uses "teachable agent" mode — surfacing its own limitations so students debug it, turning AI errors into critical thinking exercises.</div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section-tag">Technical Architecture</div>
+  <div class="arch-diagram fade-up">
+    <div class="arch-node">
+      <div class="arch-node-label">Input</div>
+      <div class="arch-node-title">Student</div>
+    </div>
+    <div class="arch-arrow">→<span>question / passage</span></div>
+    <div class="arch-node highlight">
+      <div class="arch-node-label">Core</div>
+      <div class="arch-node-title">MetaCogLite</div>
+    </div>
+    <div class="arch-arrow">↔<span>retrieval</span></div>
+    <div class="arch-node">
+      <div class="arch-node-label">Knowledge</div>
+      <div class="arch-node-title">RAG Base</div>
+    </div>
+    <div class="arch-arrow">→<span>scaffold</span></div>
+    <div class="arch-node">
+      <div class="arch-node-label">Output</div>
+      <div class="arch-node-title">Guided Q&A</div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo" style="padding-top:100px;padding-bottom:0">
+  <div class="section-tag">03 / Product Demo</div>
+  <h2 class="section-title">Watch the scaffolding in action</h2>
+</section>
+<div style="padding: 0 80px 100px; background: var(--paper)">
+  <div class="demo-container fade-up">
+    <div class="demo-tabs">
+      <button class="demo-tab active" onclick="showTab('predict')">Phase 1: Predicting</button>
+      <button class="demo-tab" onclick="showTab('clarify')">Phase 2: Clarifying</button>
+      <button class="demo-tab" onclick="showTab('scaffold')">Phase 3: Scaffolding</button>
+    </div>
+
+    <div id="tab-predict" class="demo-panel active">
+      <div class="chat-window" id="chat-predict">
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            <span class="strategy-tag">PREDICTING</span><br>
+            Before we read the passage "Powering the Industrial Revolution," take a moment — what themes or ideas do you predict this text will cover? What do you already know about this topic?
+          </div>
+        </div>
+        <div class="chat-msg user">
+          <div class="chat-avatar">S</div>
+          <div class="chat-bubble">I think it'll be about steam engines and coal... factories maybe?</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            Good — you've activated relevant schema. Now, as you read, track which of your predictions hold up and which don't. The mismatches are where the most interesting learning happens.<br><br>
+            When you're ready with the first paragraph, what's the main claim the author is making?
+          </div>
+        </div>
+      </div>
+      <div class="demo-replay">
+        <button class="replay-btn" onclick="replayChat('predict')">↺ Replay</button>
+        <span class="replay-hint">Predicting activates prior knowledge and sets a purpose for reading</span>
+      </div>
+    </div>
+
+    <div id="tab-clarify" class="demo-panel">
+      <div class="chat-window" id="chat-clarify">
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            <span class="strategy-tag">CLARIFYING</span><br>
+            Which part of the passage are you finding difficult right now?
+          </div>
+        </div>
+        <div class="chat-msg user">
+          <div class="chat-avatar">S</div>
+          <div class="chat-bubble">The phrase "made little sense" in paragraph 2 — I don't understand what "made little sense" in context means here.</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            Good catch — that's a subtle one. Before I explain, look at the sentence structure: what is the subject? What is "making little sense"? Try to identify what the author is saying was illogical.
+          </div>
+        </div>
+        <div class="chat-msg user">
+          <div class="chat-avatar">S</div>
+          <div class="chat-bubble">Is it... the idea of owning more land than you could use?</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            Exactly. In nomadic societies, land accumulation was irrational — you couldn't carry it. The author is highlighting how agricultural logic was culturally foreign, not just unfamiliar. This is key to the passage's argument about social transformation.
+          </div>
+        </div>
+      </div>
+      <div class="demo-replay">
+        <button class="replay-btn" onclick="replayChat('clarify')">↺ Replay</button>
+        <span class="replay-hint">Clarifying: AI guides the student to locate confusion before explaining</span>
+      </div>
+    </div>
+
+    <div id="tab-scaffold" class="demo-panel">
+      <div class="chat-window" id="chat-scaffold">
+        <div class="chat-msg user">
+          <div class="chat-avatar">S</div>
+          <div class="chat-bubble">For the sentence insertion question, I think the answer is [B] because it sounds right after that sentence.</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            <span class="strategy-tag">QUESTIONING</span><br>
+            "Sounds right" is a feeling — let's make it a reason. Look at the sentence to be inserted: does it start with a pronoun or a transition word? If so, what does it refer back to?
+          </div>
+        </div>
+        <div class="chat-msg user">
+          <div class="chat-avatar">S</div>
+          <div class="chat-bubble">It starts with "This"... so it must be referring to something mentioned just before it.</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            Right. Now scan positions [A], [B], [C], [D] — which position has a noun or concept in the preceding sentence that "This" could logically refer to? That's your answer, not intuition.
+          </div>
+        </div>
+        <div class="chat-msg user">
+          <div class="chat-avatar">S</div>
+          <div class="chat-bubble">Oh — position [C] has "the new transportation system" right before it, and the inserted sentence says "This network..." so it must be [C].</div>
+        </div>
+        <div class="chat-msg ai">
+          <div class="chat-avatar">元</div>
+          <div class="chat-bubble">
+            Correct. And notice what just happened — you didn't need me to give you the answer. You applied a referent-tracking strategy. That strategy works on every sentence insertion question, not just this one.
+          </div>
+        </div>
+      </div>
+      <div class="demo-replay">
+        <button class="replay-btn" onclick="replayChat('scaffold')">↺ Replay</button>
+        <span class="replay-hint">Scaffolding: AI asks questions instead of answering them</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESEARCH -->
+<section id="research">
+  <div class="section-tag">04 / User Research</div>
+  <h2 class="section-title">Data-driven from day one</h2>
+  <div class="research-grid">
+    <div class="research-block fade-up">
+      <h3>76 In-service Teachers</h3>
+      <p>Surveyed to understand which tasks teachers most wanted automated and which required human judgment. The findings directly shaped V2's feature set.</p>
+      <ul class="finding-list">
+        <li>Vocabulary explanation ranked #1 most-wanted automated task</li>
+        <li>Content logic analysis rated most critical — cannot be delegated to AI</li>
+        <li>Teacher-initiated interactions: over 50% of classroom exchanges</li>
+        <li>Grammar explanation tested and abandoned — POS tagging error rate too high</li>
+      </ul>
+    </div>
+    <div class="research-block fade-up" style="transition-delay:0.15s">
+      <h3>10 Student Case Studies</h3>
+      <p>Pre/post testing with behavioral coding. Student interaction logs coded into "processed" vs. "unprocessed" categories to measure metacognitive engagement.</p>
+      <ul class="finding-list">
+        <li>Metacognitive strategy frequency correlated with score improvement (r = 0.994)</li>
+        <li>Only 1 of 5 students showed significant strategy change after Phase 1</li>
+        <li>Finding led to key pivot: embed strategies into tool design, not just instruction</li>
+        <li>Students who "debugged" AI errors showed highest critical thinking gains</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ITERATION -->
+<section id="iteration" style="background: var(--cream)">
+  <div class="section-tag">05 / Product Iteration</div>
+  <h2 class="section-title">Three data-driven iterations</h2>
+  <div class="iteration-timeline">
+    <div class="iteration-item fade-up" data-v="V0">
+      <div class="iter-version">VERSION 0</div>
+      <div class="iter-trigger">Trigger: Access barrier — domestic users couldn't reach GPT</div>
+      <div class="iter-title">Mirror Site Deployment</div>
+      <div class="iter-desc">Built a mirror server to allow Chinese users to access the tool without VPN. Expanded the user base from 0 to a testable scale for Phase 1 research.</div>
+      <div class="iter-outcome">→ Outcome: Sufficient users to conduct pre/post behavioral study</div>
+    </div>
+    <div class="iteration-item fade-up" data-v="V1">
+      <div class="iter-version">VERSION 1</div>
+      <div class="iter-trigger">Trigger: Pre/post data showed metacognitive strategy use correlated with score gains</div>
+      <div class="iter-title">Metacognitive Intervention + Reciprocal Teaching Mode</div>
+      <div class="iter-desc">Added a 90-minute intervention course. Redesigned AI interaction model: shifted from answering questions to asking them. Implemented Ann Brown's Reciprocal Teaching method as the core interaction protocol. AI now initiates 30–70% of exchanges.</div>
+      <div class="iter-outcome">→ Outcome: Increased autonomous practice frequency; metacognitive behaviors became observable and measurable</div>
+    </div>
+    <div class="iteration-item fade-up" data-v="V2">
+      <div class="iter-version">VERSION 2</div>
+      <div class="iter-trigger">Trigger: 76-teacher survey revealed vocabulary and grammar as top teacher needs</div>
+      <div class="iter-title">Vocabulary Module Launch + Grammar Module Abandoned</div>
+      <div class="iter-desc">Added structured vocabulary explanation module with custom prompt engineering for format, etymology, and collocations. Tested grammar explanation in parallel. Grammar POS tagging error rate was unacceptably high — risked misguidance. Decision: ship vocabulary, kill grammar. Data, not assumption.</div>
+      <div class="iter-outcome">→ Outcome: Vocabulary explanations matched human teacher accuracy at 24/7 availability. Grammar removed before harming users.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-name">Liu Yizheng 刘一峥</div>
+    <div class="footer-title">AI Education Product Designer · PKU Educational Technology M.S. 2024</div>
+    <div class="footer-contact">
+      kathy.yizheng.liu@gmail.com<br>
+      18800011089<br>
+      Hangzhou · Remote-friendly
+    </div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-pku">Peking University<br>Educational Technology<br>Class of 2024</div>
+  </div>
+</footer>
+
+<script>
+  // Tab switching
+  function showTab(name) {
+    document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+    setTimeout(() => animateChat(name), 100);
+  }
+
+  // Chat animation
+  function animateChat(name) {
+    const msgs = document.querySelectorAll('#chat-' + name + ' .chat-msg');
+    msgs.forEach(m => { m.classList.remove('visible'); });
+    msgs.forEach((m, i) => {
+      setTimeout(() => m.classList.add('visible'), i * 350);
+    });
+  }
+
+  function replayChat(name) {
+    const msgs = document.querySelectorAll('#chat-' + name + ' .chat-msg');
+    msgs.forEach(m => m.classList.remove('visible'));
+    setTimeout(() => animateChat(name), 100);
+  }
+
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-up, .stat-item, .problem-card, .pillar').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Init first chat
+  window.addEventListener('load', () => {
+    setTimeout(() => animateChat('predict'), 600);
+  });
+</script>
+</body>
+</html>
